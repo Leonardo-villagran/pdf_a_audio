@@ -62,14 +62,3 @@ __pycache__/
 *.7z
 *.egg-info/
 
-# Video y multimedia
-/video/
-/imagen/
-*.mp4
-*.avi
-*.mov
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.webp

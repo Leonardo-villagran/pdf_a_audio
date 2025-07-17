@@ -4,6 +4,7 @@ Esta es una aplicación web full-stack que convierte archivos PDF a audio. Utili
 
 [![Ver video](./imagen/thumbnail.jpg)](./video/Pdf_A_Audio_chico.mp4)
 
+
 El backend se encarga de:
 - Extraer texto de archivos PDF usando `PyMuPDF` y `pytesseract` (OCR).
 - Convertir el texto extraído a audio usando `edge-tts`.
