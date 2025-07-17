@@ -1,0 +1,7 @@
+flask
+pymupdf
+Pillow
+pytesseract
+gTTS
+python-dotenv
+Flask-Cors

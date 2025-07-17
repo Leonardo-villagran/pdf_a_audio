@@ -1,0 +1,215 @@
+:root {
+  --primary-color: #61dafb;
+  --background-color: #282c34;
+  --container-bg-color: #3a3f47;
+  --text-color: #ffffff;
+  --error-color: #ff6b6b;
+  --success-color: #70ff8a;
+  --disabled-color: #cccccc;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 90vh;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  width: 100%;
+  align-items: stretch;
+  flex-grow: 1;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.card {
+  background-color: var(--container-bg-color);
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card:first-child {
+  flex: 1; /* Aprox 33% */
+}
+
+.card:last-child {
+  flex: 2; /* Aprox 66% */
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+}
+
+h1 {
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  padding-top: 2rem;
+}
+
+h2 {
+  color: var(--text-color);
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--primary-color);
+  padding-bottom: 0.5rem;
+}
+
+textarea {
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+  min-height: 250px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 0.9em;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+label {
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+input[type="file"], select {
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+input[type="file"]:focus, select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+button {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--primary-color);
+  color: var(--background-color);
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+button:disabled {
+  background-color: var(--disabled-color);
+  cursor: not-allowed;
+  transform: none;
+}
+
+button:hover:not(:disabled) {
+  background-color: #21a1f2;
+  transform: translateY(-2px);
+}
+
+.error {
+  color: var(--error-color);
+  margin-top: 1rem;
+  padding: 0.8rem;
+  background-color: rgba(255, 107, 107, 0.1);
+  border-radius: 8px;
+}
+
+.result {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: var(--background-color);
+  border-radius: 8px;
+}
+
+h2 {
+  color: var(--success-color);
+}
+
+audio {
+  margin-top: 1rem;
+  width: 100%;
+  border-radius: 5px;
+}
+
+a {
+  color: var(--primary-color);
+  display: inline-block;
+  margin-top: 1rem;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: #21a1f2;
+}
+
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.titulo-principal {
+  margin-top: 0;
+  padding-top: 0.5rem;
+  /* o 0 si quieres que toque el borde */
+  margin-bottom: 0.5rem;
+  /* reduce este valor para acercar a las cards */
+  font-size: 2.2rem;
+  /* Puedes agregar más estilos si lo deseas */
+}

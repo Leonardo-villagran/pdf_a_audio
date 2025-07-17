@@ -1,0 +1,75 @@
+# General
+.DS_Store
+Thumbs.db
+*.log
+*.pyc
+__pycache__/
+.env
+
+# Backend
+/backend/env/
+/backend/__pycache__/
+/backend/input/
+/backend/output/
+/backend/.env
+/backend/.vscode/
+/backend/*.sqlite3
+/backend/*.db
+/backend/*.pkl
+/backend/*.bak
+/backend/*.tmp
+/backend/.pytest_cache/
+/backend/.mypy_cache/
+/backend/.coverage
+/backend/instance/
+/backend/build/
+/backend/dist/
+/backend/*.egg-info/
+
+# Frontend
+/frontend/node_modules/
+/frontend/.env
+/frontend/.env.*
+/frontend/dist/
+/frontend/build/
+/frontend/.vscode/
+/frontend/.DS_Store
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/.cache/
+
+# Render/Deploy
+*.sqlite3
+*.db
+*.pkl
+*.bak
+*.tmp
+
+# Otros
+.idea/
+.vscode/
+*.swp
+*.swo
+*.bak
+*.tmp
+*.old
+*.orig
+*.zip
+*.tar.gz
+*.tar
+*.rar
+*.7z
+*.egg-info/
+
+# Video y multimedia
+/video/
+/imagen/
+*.mp4
+*.avi
+*.mov
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
