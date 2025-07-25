@@ -1,3 +1,4 @@
+
 flask
 pymupdf
 Pillow
@@ -5,3 +6,5 @@ pytesseract
 gTTS
 python-dotenv
 Flask-Cors
+edge-tts
+ pydub

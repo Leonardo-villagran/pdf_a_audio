@@ -1,69 +1,48 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Frontend - PDF a Audio
 
-Currently, two official plugins are available:
+> **Nota:** El backend del proyecto utiliza Python 3.13.2 en un entorno virtual (`backend/env`).
+> El backend ahora maneja robustamente la conversión de texto a audio: divide el texto en fragmentos, limpia y subdivide fragmentos problemáticos, y detiene el proceso si algún fragmento no puede ser procesado tras todos los intentos. La variable FFMPEG_PATH en el archivo `.env` del backend debe estar correctamente configurada.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+> **Advertencia:** Actualmente este frontend está pensado para funcionar en Windows junto al backend del proyecto. El soporte para otras plataformas podría añadirse en el futuro.
 
-## Expanding the ESLint configuration
+Este frontend es una aplicación React + TypeScript creada con Vite. Permite subir archivos PDF y convertirlos a audio usando el backend Flask.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Requisitos
+- Node.js >= 16
+- npm >= 7
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Instalación y ejecución local
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+1. Navega a la carpeta `frontend`:
+   ```sh
+   cd frontend
+   ```
+2. Instala las dependencias:
+   ```sh
+   npm install
+   ```
+3. Crea un archivo `.env` en la raíz de `frontend` con la URL de tu backend:
+   ```env
+   VITE_API_BASE_URL=http://localhost:5000
+   ```
+   (Cambia la URL si tu backend está en otro host o puerto)
+4. Inicia la aplicación:
+   ```sh
+   npm start
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+La app estará disponible en `http://localhost:3000`.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Despliegue en Render
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **Servicio:** Static Site
+- **Root Directory:** `frontend`
+- **Build Command:** `npm install && npm run build`
+- **Publish Directory:** `dist`
+- **Variable de entorno:**
+  - `VITE_API_BASE_URL` con la URL de tu backend desplegado
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+
+Este proyecto utiliza Vite para desarrollo rápido y recarga en caliente (HMR). Puedes personalizar la configuración en `vite.config.ts` y los estilos en `src/App.css` o `src/index.css`.

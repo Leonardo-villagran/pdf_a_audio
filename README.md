@@ -1,5 +1,7 @@
 # PDF a Audio
 
+> **Advertencia:** Actualmente esta aplicación solo funciona en Windows. El soporte para otras plataformas podría añadirse en el futuro.
+
 Esta es una aplicación web full-stack que convierte archivos PDF a audio. Utiliza React para el frontend y Flask (Python) para el backend.
 
 [![Ver video](./imagen/thumbnail.jpg)](./video/Pdf_A_Audio_chico.mp4)
@@ -17,7 +19,7 @@ El backend se encarga de:
   - `ocr_pdf_to_text.py`: Lógica para la extracción de texto y OCR.
   - `text_to_speech.py`: Lógica para la conversión de texto a voz.
   - `build.sh`: Script para instalar dependencias en plataformas como Render.
-  - `.env`: Archivo para variables de entorno locales (solo para Windows).
+  - `.env`: Archivo para variables de entorno locales (solo para Windows). Debe incluir la ruta a Tesseract y a ffmpeg (FFMPEG_PATH).
 
 ---
 
@@ -29,10 +31,17 @@ Hay dos modos de ejecución: Local (para desarrollo en Windows) y Despliegue (pa
 
 Este modo depende de una instalación manual de Tesseract-OCR.
 
-**Requisitos:**
-- Python 3.x
+- Python 3.13.2 (se recomienda usar el entorno virtual incluido en `backend/env`)
 - Node.js y npm
 - Tesseract-OCR instalado en el sistema.
+
+
+**Notas importantes sobre la conversión de texto a audio:**
+- El backend divide el texto en fragmentos de hasta 3000 caracteres, cortando siempre en el punto final más cercano.
+- Si un fragmento da error, el sistema intenta limpiarlo (eliminando caracteres no imprimibles y espacios redundantes) y reintenta.
+- Si sigue fallando, subdivide el fragmento en partes más pequeñas y vuelve a intentar.
+- Si después de todos los intentos (limpieza y subdivisión) algún fragmento o subfragmento no puede ser procesado, el proceso se detiene y muestra el error, sin continuar con los siguientes fragmentos.
+- La variable FFMPEG_PATH en el archivo `.env` debe apuntar al ejecutable de ffmpeg en tu sistema.
 
 **Pasos:**
 
@@ -41,10 +50,11 @@ Este modo depende de una instalación manual de Tesseract-OCR.
     - Crea un entorno virtual: `python -m venv env`
     - Activa el entorno: `.\env\Scripts\activate`
     - Instala las dependencias: `pip install -r requirements.txt`
-    - Crea un archivo `.env` y define las rutas a tu instalación de Tesseract:
+    - Crea un archivo `.env` y define las rutas a tu instalación de Tesseract **y ffmpeg**:
       ```
       TESSERACT_CMD="C:\\Ruta\\A\\Tesseract-OCR\\tesseract.exe"
       TESSDATA_PREFIX="C:\\Ruta\\A\\Tesseract-OCR\\tessdata"
+      FFMPEG_PATH="C:\\Ruta\\A\\ffmpeg\\bin\\ffmpeg.exe"
       ```
     - Ejecuta el servidor: `python app.py`
 
