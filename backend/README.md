@@ -31,7 +31,6 @@ Este backend está construido con Flask y expone un endpoint para convertir arch
    FFMPEG_PATH="C:\\Ruta\\A\\ffmpeg\\bin\\ffmpeg.exe"
    ```
 ---
-
 ## Manejo robusto de fragmentos y errores
 
 - El backend divide el texto en fragmentos de hasta 3000 caracteres, cortando siempre en el punto final más cercano.

@@ -62,4 +62,4 @@ __pycache__/
 *.7z
 *.egg-info/
 /libros
-README.pdf
+backend/README.pdf
