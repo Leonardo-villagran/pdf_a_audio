@@ -7,7 +7,7 @@ import uuid
 import time
 from datetime import datetime, timedelta
 from ocr_pdf_to_text import ocr_pdf_to_text, extract_text_from_pdf
-from text_to_speech import text_to_speech
+from text_to_speech import text_to_speech, list_windows_voices, get_tts_capabilities
 
 app = Flask(__name__, static_folder=None)
 CORS(app) # Habilitar CORS para toda la aplicación
@@ -64,6 +64,21 @@ def get_voices():
     except Exception as e:
         return jsonify({'error': f'Error obteniendo voces: {str(e)}'}), 500
 
+@app.route('/api/local-voices', methods=['GET'])
+def get_local_voices():
+    try:
+        voices = list_windows_voices()
+        return jsonify(voices)
+    except Exception as e:
+        return jsonify({'error': f'Error obteniendo voces locales: {str(e)}'}), 500
+
+@app.route('/api/tts-capabilities', methods=['GET'])
+def get_tts_capabilities_route():
+    try:
+        return jsonify(get_tts_capabilities())
+    except Exception as e:
+        return jsonify({'error': f'Error obteniendo capacidades TTS: {str(e)}'}), 500
+
 @app.route('/api/pdf-to-text', methods=['POST'])
 def pdf_to_text():
     # Ejecutar limpieza antes de procesar el nuevo archivo
@@ -112,9 +127,21 @@ def text_to_audio():
 
     try:
         # Llamar a la función principal de texto a voz con el archivo temporal
-        asyncio.run(text_to_speech(temp_text_path, output_path, voice))
-        return jsonify({'audio': audio_filename})
+        synthesis_result = asyncio.run(text_to_speech(temp_text_path, output_path, voice))
+        if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
+            raise RuntimeError('La conversión finalizó sin generar un archivo MP3 válido')
+        return jsonify({
+            'audio': audio_filename,
+            'provider': synthesis_result.get('provider') if synthesis_result else None,
+            'voiceRequested': synthesis_result.get('voice_requested') if synthesis_result else voice,
+            'voiceUsed': synthesis_result.get('voice_used') if synthesis_result else voice,
+        })
     except Exception as e:
+        if os.path.exists(output_path):
+            try:
+                os.remove(output_path)
+            except OSError:
+                pass
         return jsonify({'error': f'Error generando audio: {str(e)}'}), 500
     finally:
         # Limpiar el archivo de texto temporal
