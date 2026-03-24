@@ -36,6 +36,20 @@ def split_text_by_dot(text, max_length=3000):
         fragments.append(text.strip())
     return fragments
 
+def clamp_speed(speed: float | None) -> float:
+    """Normaliza la velocidad pedida por la UI."""
+    if speed is None:
+        return 1.0
+    return max(0.6, min(1.6, float(speed)))
+
+def speed_to_piper_length(base_length_scale: str | float, speed: float) -> str:
+    """
+    Piper usa length_scale inverso a la intuición del usuario:
+    mayor length_scale = habla más lenta.
+    """
+    adjusted = float(base_length_scale) / clamp_speed(speed)
+    return f"{adjusted:.2f}"
+
 def get_ffmpeg_bin():
     """Resuelve la ruta de ffmpeg desde .env, una copia local o el PATH."""
     ffmpeg_env = os.getenv('FFMPEG_PATH')
@@ -93,17 +107,59 @@ def map_voice_to_piper(voice: str):
     Mapea opciones de UI a voces offline reales de Piper.
     """
     mapping = {
-        'es-LATAM-LorenzoOffline': {
+        'piper:es_MX-claude-high': {
             'voice_code': 'es_MX-claude-high',
             'speaker': '0',
             'display_voice': 'es_MX-claude-high',
+            'length_scale': '1.24',
+        },
+        'piper:es_MX-ald-medium': {
+            'voice_code': 'es_MX-ald-medium',
+            'speaker': '0',
+            'display_voice': 'es_MX-ald-medium',
+            'length_scale': '1.22',
+        },
+        'piper:es_AR-daniela-high': {
+            'voice_code': 'es_AR-daniela-high',
+            'speaker': '0',
+            'display_voice': 'es_AR-daniela-high',
+            'length_scale': '1.20',
+        },
+        'piper:es_ES-carlfm-x_low': {
+            'voice_code': 'es_ES-carlfm-x_low',
+            'speaker': '0',
+            'display_voice': 'es_ES-carlfm-x_low',
             'length_scale': '1.18',
         },
-        'es-LATAM-CatalinaOffline': {
+        'piper:es_ES-davefx-medium': {
+            'voice_code': 'es_ES-davefx-medium',
+            'speaker': '0',
+            'display_voice': 'es_ES-davefx-medium',
+            'length_scale': '1.18',
+        },
+        'piper:es_ES-mls_10246-low': {
+            'voice_code': 'es_ES-mls_10246-low',
+            'speaker': '0',
+            'display_voice': 'es_ES-mls_10246-low',
+            'length_scale': '1.18',
+        },
+        'piper:es_ES-mls_9972-low': {
+            'voice_code': 'es_ES-mls_9972-low',
+            'speaker': '0',
+            'display_voice': 'es_ES-mls_9972-low',
+            'length_scale': '1.18',
+        },
+        'piper:es_ES-sharvard-medium:M': {
+            'voice_code': 'es_ES-sharvard-medium',
+            'speaker': '0',
+            'display_voice': 'es_ES-sharvard-medium speaker M',
+            'length_scale': '1.22',
+        },
+        'piper:es_ES-sharvard-medium:F': {
             'voice_code': 'es_ES-sharvard-medium',
             'speaker': '1',
-            'display_voice': 'es_ES-sharvard-medium (F)',
-            'length_scale': '1.18',
+            'display_voice': 'es_ES-sharvard-medium speaker F',
+            'length_scale': '1.20',
         },
     }
     return mapping.get(voice)
@@ -151,7 +207,7 @@ def merge_mp3_files(temp_files, output_file):
         if os.path.exists(concat_file):
             os.remove(concat_file)
 
-def text_to_speech_azure(full_text: str, output_file: str, voice: str):
+def text_to_speech_azure(full_text: str, output_file: str, voice: str, speed: float = 1.0):
     """Proveedor de producción via Azure Speech REST API."""
     speech_key = os.getenv('AZURE_SPEECH_KEY')
     speech_region = os.getenv('AZURE_SPEECH_REGION')
@@ -172,7 +228,7 @@ def text_to_speech_azure(full_text: str, output_file: str, voice: str):
             ssml = (
                 "<speak version='1.0' xml:lang='es-CL'>"
                 f"<voice name='{voice}'>"
-                f"{escape(fragment)}"
+                f"<prosody rate='{((clamp_speed(speed) - 1.0) * 100):+.0f}%'>{escape(fragment)}</prosody>"
                 "</voice></speak>"
             )
 
@@ -222,7 +278,7 @@ def text_to_speech_azure(full_text: str, output_file: str, voice: str):
             except Exception:
                 pass
 
-def text_to_speech_google_cloud(full_text: str, output_file: str, voice: str):
+def text_to_speech_google_cloud(full_text: str, output_file: str, voice: str, speed: float = 1.0):
     """Proveedor oficial Google Cloud Text-to-Speech via REST."""
     credentials = get_google_tts_credentials()
     if credentials is None:
@@ -253,7 +309,10 @@ def text_to_speech_google_cloud(full_text: str, output_file: str, voice: str):
                 json={
                     'input': {'text': fragment},
                     'voice': google_voice,
-                    'audioConfig': {'audioEncoding': 'MP3'},
+                    'audioConfig': {
+                        'audioEncoding': 'MP3',
+                        'speakingRate': clamp_speed(speed),
+                    },
                 },
                 timeout=60,
             )
@@ -296,7 +355,7 @@ def text_to_speech_google_cloud(full_text: str, output_file: str, voice: str):
             except Exception:
                 pass
 
-def text_to_speech_piper(full_text: str, output_file: str, voice: str):
+def text_to_speech_piper(full_text: str, output_file: str, voice: str, speed: float = 1.0):
     """Proveedor offline usando Piper TTS y ffmpeg para MP3."""
     piper_voice = map_voice_to_piper(voice)
     if piper_voice is None:
@@ -328,7 +387,7 @@ def text_to_speech_piper(full_text: str, output_file: str, voice: str):
                 '--input_file', temp_txt,
                 '--output_file', temp_wav,
                 '--speaker', piper_voice['speaker'],
-                '--length_scale', piper_voice['length_scale'],
+                '--length_scale', speed_to_piper_length(piper_voice['length_scale'], speed),
                 '--data-dir', str(model_path.parent),
             ]
             subprocess.run(piper_cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -407,7 +466,7 @@ $synth.Dispose()
         })
     return voices
 
-def text_to_speech_windows(full_text: str, output_file: str, voice: str):
+def text_to_speech_windows(full_text: str, output_file: str, voice: str, speed: float = 1.0):
     """Fallback local usando System.Speech en Windows y ffmpeg para MP3."""
     locale = voice_to_locale_prefix(voice)
     lang_prefix = locale.split('-')[0]
@@ -421,6 +480,7 @@ $textPath = $args[0]
 $wavPath = $args[1]
 $locale = $args[2]
 $langPrefix = $args[3]
+$rate = [int]$args[4]
 $text = [System.IO.File]::ReadAllText($textPath, [System.Text.Encoding]::UTF8)
 $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer
 
@@ -435,6 +495,7 @@ if (-not $selectedVoice) {
 }
 
 $synth.SelectVoice($selectedVoice.Name)
+$synth.Rate = $rate
 $synth.SetOutputToWaveFile($wavPath)
 $synth.Speak($text)
 $synth.Dispose()
@@ -459,6 +520,7 @@ Write-Output ("VOICE_CULTURE=" + $selectedVoice.Culture.Name)
             temp_wav_path,
             locale,
             lang_prefix,
+            str(max(-10, min(10, round((clamp_speed(speed) - 1.0) * 10)))),
         ]
         result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8')
 
@@ -500,7 +562,7 @@ Write-Output ("VOICE_CULTURE=" + $selectedVoice.Culture.Name)
             except Exception:
                 pass
 
-async def text_to_speech(text_file: str, output_file: str, voice: str):
+async def text_to_speech(text_file: str, output_file: str, voice: str, speed: float = 1.0):
     """
     Convierte un archivo de texto a MP3 usando Azure Speech si está configurado,
     luego edge-tts y finalmente fallback local de Windows si existe voz compatible.
@@ -574,12 +636,12 @@ async def text_to_speech(text_file: str, output_file: str, voice: str):
             raise RuntimeError(f"Fragmento {idx+1} no se pudo procesar tras todos los intentos.")
 
     if is_azure_tts_configured():
-        return text_to_speech_azure(full_text, output_file, voice)
+        return text_to_speech_azure(full_text, output_file, voice, speed=speed)
 
     if is_google_tts_configured():
-        return text_to_speech_google_cloud(full_text, output_file, voice)
+        return text_to_speech_google_cloud(full_text, output_file, voice, speed=speed)
 
-    return text_to_speech_piper(full_text, output_file, voice)
+    return text_to_speech_piper(full_text, output_file, voice, speed=speed)
 
 # --- Ejecución Directa (para pruebas) ---
 if __name__ == "__main__":

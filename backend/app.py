@@ -113,6 +113,7 @@ def text_to_audio():
 
     text = data['text']
     voice = data['voice']
+    speed = data.get('speed', 1.0)
     
     # Generar un nombre de archivo único para el audio
     audio_filename = str(uuid.uuid4()) + ".mp3"
@@ -127,7 +128,7 @@ def text_to_audio():
 
     try:
         # Llamar a la función principal de texto a voz con el archivo temporal
-        synthesis_result = asyncio.run(text_to_speech(temp_text_path, output_path, voice))
+        synthesis_result = asyncio.run(text_to_speech(temp_text_path, output_path, voice, speed=float(speed)))
         if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
             raise RuntimeError('La conversión finalizó sin generar un archivo MP3 válido')
         return jsonify({
@@ -135,6 +136,7 @@ def text_to_audio():
             'provider': synthesis_result.get('provider') if synthesis_result else None,
             'voiceRequested': synthesis_result.get('voice_requested') if synthesis_result else voice,
             'voiceUsed': synthesis_result.get('voice_used') if synthesis_result else voice,
+            'speedUsed': float(speed),
         })
     except Exception as e:
         if os.path.exists(output_path):

@@ -31,6 +31,7 @@ interface TextToAudioResponse {
   provider?: string | null;
   voiceRequested?: string | null;
   voiceUsed?: string | null;
+  speedUsed?: number | null;
 }
 
 interface ApiErrorResponse {
@@ -54,16 +55,58 @@ const countryMap: { [key: string]: string } = {
 
 const OFFLINE_VOICE_OPTIONS: Voice[] = [
   {
-    Name: 'Piper Latino Masculino',
-    ShortName: 'es-LATAM-LorenzoOffline',
+    Name: 'Piper es_AR-daniela-high',
+    ShortName: 'piper:es_AR-daniela-high',
+    Gender: 'Female',
+    Locale: 'es-AR',
+  },
+  {
+    Name: 'Piper es_ES-carlfm-x_low',
+    ShortName: 'piper:es_ES-carlfm-x_low',
+    Gender: 'Unknown',
+    Locale: 'es-ES',
+  },
+  {
+    Name: 'Piper es_ES-davefx-medium',
+    ShortName: 'piper:es_ES-davefx-medium',
+    Gender: 'Unknown',
+    Locale: 'es-ES',
+  },
+  {
+    Name: 'Piper es_ES-mls_10246-low',
+    ShortName: 'piper:es_ES-mls_10246-low',
+    Gender: 'Unknown',
+    Locale: 'es-ES',
+  },
+  {
+    Name: 'Piper es_ES-mls_9972-low',
+    ShortName: 'piper:es_ES-mls_9972-low',
+    Gender: 'Unknown',
+    Locale: 'es-ES',
+  },
+  {
+    Name: 'Piper es_ES-sharvard-medium speaker M',
+    ShortName: 'piper:es_ES-sharvard-medium:M',
     Gender: 'Male',
+    Locale: 'es-ES',
+  },
+  {
+    Name: 'Piper es_ES-sharvard-medium speaker F',
+    ShortName: 'piper:es_ES-sharvard-medium:F',
+    Gender: 'Female',
+    Locale: 'es-ES',
+  },
+  {
+    Name: 'Piper es_MX-ald-medium',
+    ShortName: 'piper:es_MX-ald-medium',
+    Gender: 'Unknown',
     Locale: 'es-MX',
   },
   {
-    Name: 'Piper Femenino',
-    ShortName: 'es-LATAM-CatalinaOffline',
-    Gender: 'Female',
-    Locale: 'es-ES',
+    Name: 'Piper es_MX-claude-high',
+    ShortName: 'piper:es_MX-claude-high',
+    Gender: 'Unknown',
+    Locale: 'es-MX',
   },
 ];
 
@@ -73,13 +116,12 @@ function formatVoiceName(voice: Voice): string {
   const countryCode = localeParts[1];
   const countryName = countryMap[countryCode] || countryCode;
   
-  // Extraer solo el nombre de la persona, ej: "Lorenzo" de "Microsoft Server Speech Text to Speech Voice (es-CL, LorenzoNeural)"
-  const nameMatch = Name.match(/(\w+)Neural/);
-  const cleanName = nameMatch ? nameMatch[1] : voice.ShortName.split('-').pop()?.replace('Neural', '');
+  const genderSpanish =
+    Gender === 'Male' ? 'Masculino' :
+    Gender === 'Female' ? 'Femenino' :
+    'Sin género marcado';
 
-  const genderSpanish = Gender === 'Male' ? 'Masculino' : 'Femenino';
-
-  return `${countryName}: ${cleanName} (${genderSpanish})`;
+  return `${countryName}: ${Name} (${genderSpanish})`;
 }
 
 function App() {
@@ -88,6 +130,7 @@ function App() {
   const [localVoices, setLocalVoices] = useState<LocalVoice[]>([]);
   const [selectedVoice, setSelectedVoice] = useState<string>('');
   const [extractedText, setExtractedText] = useState<string>('');
+  const [speechSpeed, setSpeechSpeed] = useState<number>(1.0);
   const [audioFileName, setAudioFileName] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingAudio, setLoadingAudio] = useState<boolean>(false);
@@ -208,7 +251,8 @@ function App() {
       return null;
     }
 
-    const requestedLocale = selectedVoice.includes('LATAM') ? 'es-MX' : 'es';
+    const selected = voices.find((item) => item.ShortName === selectedVoice);
+    const requestedLocale = selected?.Locale || 'es';
     const exact = availableVoices.find((voice) => voice.lang.toLowerCase() === requestedLocale.toLowerCase());
     if (exact) {
       return exact;
@@ -220,7 +264,7 @@ function App() {
 
   useEffect(() => {
     if (voices.length > 0) {
-        const defaultVoice = voices.find(v => v.ShortName === 'es-LATAM-LorenzoOffline') || voices[0];
+        const defaultVoice = voices.find(v => v.ShortName === 'piper:es_MX-claude-high') || voices[0];
         setSelectedVoice(defaultVoice.ShortName);
     }
   }, [voices]);
@@ -251,6 +295,7 @@ function App() {
     setExtractedText('');
     setAudioFileName(null);
     setAudioProviderInfo(null);
+    setSpeechSpeed(1.0);
 
     try {
       const response = await axios.post(`${API_BASE_URL}/api/pdf-to-text`, formData, {
@@ -285,7 +330,8 @@ function App() {
     try {
       const response = await axios.post<TextToAudioResponse>(`${API_BASE_URL}/api/text-to-audio`, {
         text: extractedText,
-        voice: selectedVoice
+        voice: selectedVoice,
+        speed: speechSpeed,
       }, {
         headers: { 'Content-Type': 'application/json' }
       });
@@ -299,9 +345,9 @@ function App() {
         } else if (response.data.provider === 'google-cloud-tts') {
           setAudioProviderInfo(`Audio generado con Google Cloud TTS. Voz solicitada: ${response.data.voiceRequested}. Voz usada por Google: ${response.data.voiceUsed}.`);
         } else if (response.data.provider === 'piper-offline') {
-          setAudioProviderInfo(`Audio generado con Piper offline. Voz solicitada: ${response.data.voiceRequested}. Voz usada localmente: ${response.data.voiceUsed}.`);
+          setAudioProviderInfo(`Audio generado con Piper offline. Voz solicitada: ${response.data.voiceRequested}. Voz usada localmente: ${response.data.voiceUsed}. Velocidad: ${response.data.speedUsed ?? speechSpeed}x.`);
         } else if (response.data.provider === 'windows-speech') {
-          setAudioProviderInfo(`Audio generado con fallback local de Windows. Voz solicitada: ${response.data.voiceRequested}. Voz usada localmente: ${response.data.voiceUsed}.`);
+          setAudioProviderInfo(`Audio generado con fallback local de Windows. Voz solicitada: ${response.data.voiceRequested}. Voz usada localmente: ${response.data.voiceUsed}. Velocidad: ${response.data.speedUsed ?? speechSpeed}x.`);
         }
       } else {
         setError(response.data.error || 'Ocurrió un error desconocido al generar el audio.');
@@ -390,8 +436,7 @@ function App() {
               id="extracted-text"
               value={extractedText}
               onChange={e => setExtractedText(e.target.value)}
-              placeholder="El texto del PDF aparecerá aquí después de la extracción..."
-              disabled={!extractedText}
+              placeholder="El texto del PDF aparecerá aquí después de la extracción. Puedes editarlo antes de generar el audio."
             />
           </div>
           <div className="form-group">
@@ -402,6 +447,21 @@ function App() {
                 <option key={voice.ShortName} value={voice.ShortName}>{formatVoiceName(voice)}</option>
               ))}
             </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="speed">Velocidad: {speechSpeed.toFixed(2)}x</label>
+            <input
+              id="speed"
+              type="range"
+              min="0.6"
+              max="1.6"
+              step="0.05"
+              value={speechSpeed}
+              onChange={e => setSpeechSpeed(Number(e.target.value))}
+            />
+            <p className="speed-example">
+              Ejemplos: `0.80x` habla más pausado, `1.00x` es normal, `1.25x` habla más rápido.
+            </p>
           </div>
           {fallbackWarning && <p className="fallback-warning">{fallbackWarning}</p>}
           <button onClick={handleTextToAudio} disabled={!canAttemptAudioGeneration && !canUseBrowserTts}>

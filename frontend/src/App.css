@@ -128,6 +128,11 @@ input[type="file"]:focus, select:focus {
   border-color: var(--primary-color);
 }
 
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--primary-color);
+}
+
 button {
   padding: 0.8rem 1.5rem;
   border: none;
@@ -168,6 +173,14 @@ button:hover:not(:disabled) {
   color: var(--text-color);
   font-size: 0.95rem;
   line-height: 1.45;
+}
+
+.speed-example {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
 }
 
 .result {
